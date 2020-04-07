@@ -22,6 +22,11 @@
     border-radius: 5px;
 }
 
+.language, .description {
+    margin: 10px auto;
+    text-align: center;
+}
+
 .row {
     clear: both;
     width: 100%;

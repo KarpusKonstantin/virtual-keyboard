@@ -590,10 +590,13 @@ const buttonArrayRow5 = [
     },
 ];
 
-const allKeyArray = buttonArrayRow1.concat(buttonArrayRow2, buttonArrayRow3, buttonArrayRow4, buttonArrayRow5);
+//const allKeyArray = buttonArrayRow1.concat(buttonArrayRow2, buttonArrayRow3, buttonArrayRow4, buttonArrayRow5);
 
 class V_keyboard {
     constructor () {
+        this.capsLock = false;
+        this.shift = false;
+        this.alt = false;
         this.lang = localStorage.getItem('lang') || 'eng';
         this.textArea = document.createElement('textarea');
     }
@@ -630,8 +633,8 @@ class V_keyboard {
                                   <span class="caps hidden">${button.rus_eng.caps[0]}</span>
                                   <span class="shiftCaps hidden">${button.rus_eng.shiftCaps[0]}</span>`;
 
-            const span_eng_var = `<span class="noShift hidden">${button.rus_eng.noShift[1]}</span>
-                                  <span class="isShift">${button.rus_eng.isShift[1]}</span>
+            const span_eng_var = `<span class="noShift">${button.rus_eng.noShift[1]}</span>
+                                  <span class="isShift hidden">${button.rus_eng.isShift[1]}</span>
                                   <span class="caps hidden">${button.rus_eng.caps[1]}</span>
                                   <span class="shiftCaps hidden">${button.rus_eng.shiftCaps[1]}</span>`;
 
@@ -639,9 +642,6 @@ class V_keyboard {
             span_eng.innerHTML = span_eng_var;
 
             key.addEventListener('click', this.clickButton.bind(this));
-            key.addEventListener('mousedown', this.mouseDown.bind(this)); // Должен появляться класс active
-            //    key.addEventListener('mouseup', this.mouseUp.bind(this));
-
         }
 
     }
@@ -666,9 +666,31 @@ class V_keyboard {
         this.createButtonRow(keyboard, buttonArrayRow4);
         this.createButtonRow(keyboard, buttonArrayRow5);
 
+        const description = document.createElement('p');
+        description.classList.add('description');
+        description.innerText = 'Клавиатура создана в операционной системе Windows';
+        wrapper.append(description);
+
+        const changeLang = document.createElement('p');
+        changeLang.classList.add('language');
+        changeLang.innerText = 'Для переключения языка комбинация: левыe Alt + Shift';
+        wrapper.append(changeLang);
+
+
+        /* Регистрируем нажатие мыжки */
+        document.addEventListener('mousedown', this.mouseDownEvent.bind(this)); // Должен появляться класс active
+        document.addEventListener('mouseup', this.mouseUpEvent.bind(this));
+
+        /* Регистрируем нажатие кнопки */
+        document.addEventListener('keydown', this.keyDownEvent.bind(this));
+        document.addEventListener('keyup', this.keyUpEvent.bind(this));
+
+        this.changeLanguage();
+
     }
 
     clickButton (event) {
+
         let keyCode;
 
         if (!event.target.dataset.button) {
@@ -680,18 +702,19 @@ class V_keyboard {
 
         switch (keyCode) {
             case 'Backspace':
-//                    break
+                this.backSpaceHandler()
+                break;
             case 'Tab':
-//                    this.tabHandler()
+                this.tabHandler()
                 break;
             case 'Delete':
-//                    this.delHandler()
+                this.delHandler()
                 break;
             case 'CapsLock':
-//                    this.capsHandler(event)
+                this.capsHandler(event)
                 break;
             case 'Enter':
-//                    this.enterHandler()
+                this.enterHandler()
                 break;
             case 'ShiftLeft':
                 this.shiftHandler(event)
@@ -700,25 +723,14 @@ class V_keyboard {
                 this.shiftHandler(event)
                 break;
             case 'ControlLeft':
-//                    this.arrowUpHandler()
                 break;
             case 'MetaLeft':
-//                    this.ctrlHandler()
                 break;
             case 'AltLeft':
-//                    this.winHandler()
                 break;
             case 'AltRight':
-//                    this.altHandler()
-                break;
-            case 'ArrowDown':
-//                    this.arrowLeftHandler()
-                break;
-            case 'ArrowRight':
-//                    this.arrowDownHandler()
                 break;
             case 'ControlRight':
-//                    this.arrowRightHandler()
                 break;
             default:
                 this.printText(event)
@@ -728,21 +740,257 @@ class V_keyboard {
 
     printText(event) {
         /* Метод печатает символ в memo */
-        const word = event.target.textContent;
         const key_child_span = document.querySelectorAll(`.${event.target.dataset.button} span span `);
 
         if (key_child_span.length > 0) {
             /* Target DIV и значет мы ищем чего написать */
             key_child_span.forEach((item) => {
                 if (!item.classList.contains('hidden')) {
-                    this.textArea.value = this.textArea.value + item.textContent;
+                    this.setTextToInput(item.textContent)
                 }
             });
         } else {
             /* Мы уже находимя на букве и можем ее писать */
-            this.textArea.value = this.textArea.value + event.target.textContent;
+            this.setTextToInput(event.target.textContent)
+        }
+    }
+
+    tabHandler() {
+        this.setTextToInput("\t")
+    }
+
+    backSpaceHandler() {
+        let startPos = this.textArea.selectionStart;
+
+        if (startPos !== 0) {
+            this.textArea.value = `${this.textArea.value.slice(0, startPos-1)}${this.textArea.value.slice(startPos)}`;
         }
 
+        this.textArea.focus();
+        this.textArea.selectionStart = startPos - 1;
+        this.textArea.selectionEnd = startPos - 1;
+    }
+
+    delHandler() {
+        let startPos = this.textArea.selectionStart;
+        let endPos = this.textArea.selectionEnd;
+
+        if (startPos !== endPos) {
+            this.textArea.value = `${this.textArea.value.slice(0, startPos)}${this.textArea.value.slice(endPos)}`
+        } else if (endPos !== this.textArea.value.length) {
+            this.textArea.value = `${this.textArea.value.slice(0, startPos)}${this.textArea.value.slice(startPos + 1)}`
+        }
+
+        this.textArea.focus();
+        this.textArea.selectionStart = startPos;
+        this.textArea.selectionEnd = startPos;
+
+    }
+
+    enterHandler() {
+        this.setTextToInput("\n")
+    }
+
+    shiftHandler() {
+        if (this.alt) {
+            /* Меняем раскладку */
+            this.lang = this.lang === 'eng' ? 'rus' : 'eng';
+
+            localStorage.setItem('lang', this.lang)
+            this.changeLanguage();
+        }
+    }
+
+
+
+    capsHandler(event) {
+        this.capsLock = !this.capsLock;
+        let div;
+
+        /* Active должне проствляться у DIV элемента */
+        if ((event.target.dataset.button) || (event.target.tagName === 'SPAN')) {
+            if (!event.target.dataset.button) {
+                div = event.target.closest('div');
+            } else {
+                div = event.target;
+            }
+        }
+
+        if (this.capsLock) {
+            div.classList.add('active')
+        } else {
+            div.classList.remove('active')
+        }
+
+        this.changeWordCase();
+    }
+
+    mouseDownEvent(event) {
+        let keyCode = '';
+
+        /* Действия должны быть только если клик по кнопки */
+        if ((event.target.dataset.button) || (event.target.tagName === 'SPAN')) {
+            if (!event.target.dataset.button) {
+                let parentDiv = event.target.closest('div');
+                parentDiv.classList.add('active');
+                if (parentDiv.dataset.button) {
+                    keyCode = parentDiv.dataset.button;
+                }
+            } else {
+                event.target.classList.add('active');
+                keyCode = event.target.dataset.button;
+            }
+
+            if ((keyCode === 'ShiftRight') || (keyCode === 'ShiftLeft')) {
+                this.shift = true;
+                this.changeWordCase();
+            }
+        }
+    }
+
+    mouseUpEvent() {
+        let q = document.querySelectorAll('.active');
+
+        q.forEach((item) => {
+            if (!item.classList.contains('CapsLock')) {
+                item.classList.remove('active');
+            }
+        });
+
+        this.shift = false;
+        this.changeWordCase();
+    }
+
+    keyDownEvent(event) {
+        let codeKey = event.code;
+        let button = document.querySelector(`.${codeKey}`);
+
+        if (button) {
+            event.preventDefault();
+
+            button.classList.add('active');
+            button.click();
+
+            if ((codeKey === 'AltLeft') || (codeKey === 'AltRight')) {
+                this.alt = true;
+            }
+
+            if ((codeKey === 'ShiftRight') || (codeKey === 'ShiftLeft')) {
+                this.shift = true;
+            }
+
+            this.changeWordCase();
+        }
+    }
+
+    keyUpEvent(event) {
+
+        let codeKey = event.code;
+        let button = document.querySelector(`.${codeKey}`);
+
+        if (button) {
+            event.preventDefault();
+
+            if (button.dataset.button !== 'CapsLock') {
+                if (button.classList.contains('active')) {
+                    button.classList.remove('active');
+                }
+            }
+
+            if ((button.dataset.button === 'AlrRight') || (button.dataset.button === 'AlrLeft')) {
+                this.alt = false;
+            }
+
+            if ((button.dataset.button === 'ShiftRight') || (button.dataset.button === 'ShiftLeft')) {
+                this.shift = false;
+            }
+
+            if ((button.dataset.button === 'AltRight') || (button.dataset.button === 'AltLeft')) {
+                this.alt = false;
+            }
+
+//            console.log(button.dataset.button, 'Alt = ', this.alt, 'Shift = ',this.shift);
+
+            this.changeWordCase()
+
+        }
+    }
+
+    changeWordCase() {
+        let q = document.querySelectorAll(`.${this.lang} span`)
+
+        if (!this.capsLock && !this.shift) {
+            /* Обычный */
+            q.forEach((item) => {
+                if (item.classList.contains('noShift')) {
+                    item.classList.remove('hidden');
+                } else if (!item.classList.contains('hidden')) {
+                    item.classList.add('hidden');
+                }
+            });
+
+        } else if (!this.capsLock && this.shift) {
+            /* Зажат шифт без капс лока */
+            q.forEach((item) => {
+                if (item.classList.contains('isShift')) {
+                    item.classList.remove('hidden');
+                } else if (!item.classList.contains('hidden')) {
+                    item.classList.add('hidden');
+                }
+            });
+
+        } else if (this.capsLock && !this.shift) {
+            /* Капс лок без шифта */
+            q.forEach((item) => {
+                if (item.classList.contains('caps')) {
+                    item.classList.remove('hidden');
+                } else if (!item.classList.contains('hidden')) {
+                    item.classList.add('hidden');
+                }
+            });
+        } else if (this.capsLock && this.shift) {
+            q.forEach((item) => {
+                if (item.classList.contains('shiftCaps')) {
+                    item.classList.remove('hidden');
+                } else if (!item.classList.contains('hidden')) {
+                    item.classList.add('hidden');
+                }
+            });
+        }
+    }
+
+    setTextToInput(text) {
+        /* Добавляет текст в ту позицию где стоит курсор */
+        let startPos = this.textArea.selectionStart;
+        let endPos = this.textArea.selectionEnd;
+
+        this.textArea.value = `${this.textArea.value.substring(0, startPos)}${text}${this.textArea.value.substring(endPos)}`
+
+        this.textArea.focus();
+        this.textArea.selectionStart = startPos + text.length;
+        this.textArea.selectionEnd = startPos + text.length;
+
+    }
+
+    changeLanguage() {
+        let q = document.querySelectorAll('span.rus, span.eng');
+
+        q.forEach((item) => {
+            if (item.classList.contains(this.lang)) {
+                item.classList.remove('hidden')
+            } else {
+                item.classList.add('hidden');
+
+                for (let i = 0; i < item.children.length; i++ ) {
+                    if (!item.children.item(i).classList.contains('hidden')) {
+                        item.children.item(i).classList.add('hidden');
+                    }
+                }
+
+            }
+        });
+
+        this.changeWordCase();
     }
 }
 
