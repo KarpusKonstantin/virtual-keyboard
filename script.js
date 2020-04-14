@@ -602,7 +602,6 @@ class V_keyboard {
     }
 
     createButtonRow(keyboard, buttonArrayRow) {
-        /* Создаем первую строку кнопок */
         const row1 = document.createElement('div');
         row1.classList.add('row');
         keyboard.append(row1);
@@ -647,7 +646,6 @@ class V_keyboard {
     }
 
     init() {
-        /* Создаем блоки */
         const wrapper = document.createElement('div');
         wrapper.classList.add('wrapper');
 
@@ -677,11 +675,9 @@ class V_keyboard {
         wrapper.append(changeLang);
 
 
-        /* Регистрируем нажатие мыжки */
         document.addEventListener('mousedown', this.mouseDownEvent.bind(this)); // Должен появляться класс active
         document.addEventListener('mouseup', this.mouseUpEvent.bind(this));
 
-        /* Регистрируем нажатие кнопки */
         document.addEventListener('keydown', this.keyDownEvent.bind(this));
         document.addEventListener('keyup', this.keyUpEvent.bind(this));
 
@@ -739,7 +735,6 @@ class V_keyboard {
     }
 
     printText(event) {
-        /* Метод печатает символ в memo */
         const key_child_span = document.querySelectorAll(`.${event.target.dataset.button} span span `);
 
         if (key_child_span.length > 0) {
@@ -793,7 +788,6 @@ class V_keyboard {
 
     shiftHandler() {
         if (this.alt) {
-            /* Меняем раскладку */
             this.lang = this.lang === 'eng' ? 'rus' : 'eng';
 
             localStorage.setItem('lang', this.lang)
@@ -801,13 +795,11 @@ class V_keyboard {
         }
     }
 
-
-
     capsHandler(event) {
         this.capsLock = !this.capsLock;
         let div;
 
-        /* Active должне проствляться у DIV элемента */
+        /* Active must change in DIV element */
         if ((event.target.dataset.button) || (event.target.tagName === 'SPAN')) {
             if (!event.target.dataset.button) {
                 div = event.target.closest('div');
@@ -828,7 +820,6 @@ class V_keyboard {
     mouseDownEvent(event) {
         let keyCode = '';
 
-        /* Действия должны быть только если клик по кнопки */
         if ((event.target.dataset.button) || (event.target.tagName === 'SPAN')) {
             if (!event.target.dataset.button) {
                 let parentDiv = event.target.closest('div');
@@ -909,8 +900,6 @@ class V_keyboard {
                 this.alt = false;
             }
 
-//            console.log(button.dataset.button, 'Alt = ', this.alt, 'Shift = ',this.shift);
-
             this.changeWordCase()
 
         }
@@ -920,7 +909,6 @@ class V_keyboard {
         let q = document.querySelectorAll(`.${this.lang} span`)
 
         if (!this.capsLock && !this.shift) {
-            /* Обычный */
             q.forEach((item) => {
                 if (item.classList.contains('noShift')) {
                     item.classList.remove('hidden');
@@ -930,7 +918,6 @@ class V_keyboard {
             });
 
         } else if (!this.capsLock && this.shift) {
-            /* Зажат шифт без капс лока */
             q.forEach((item) => {
                 if (item.classList.contains('isShift')) {
                     item.classList.remove('hidden');
@@ -940,7 +927,6 @@ class V_keyboard {
             });
 
         } else if (this.capsLock && !this.shift) {
-            /* Капс лок без шифта */
             q.forEach((item) => {
                 if (item.classList.contains('caps')) {
                     item.classList.remove('hidden');
@@ -960,7 +946,6 @@ class V_keyboard {
     }
 
     setTextToInput(text) {
-        /* Добавляет текст в ту позицию где стоит курсор */
         let startPos = this.textArea.selectionStart;
         let endPos = this.textArea.selectionEnd;
 
