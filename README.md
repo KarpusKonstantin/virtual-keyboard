@@ -1,2 +1,2 @@
 # virtual-keyboard
-init: start project
+site: karpuskonstantin.github.io/virtual-keyboard
