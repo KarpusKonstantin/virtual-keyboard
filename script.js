@@ -719,13 +719,9 @@ class V_keyboard {
                 this.shiftHandler(event)
                 break;
             case 'ControlLeft':
-                break;
             case 'MetaLeft':
-                break;
             case 'AltLeft':
-                break;
             case 'AltRight':
-                break;
             case 'ControlRight':
                 break;
             default:
