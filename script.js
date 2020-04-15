@@ -649,8 +649,6 @@ class V_keyboard {
         const wrapper = document.createElement('div');
         wrapper.classList.add('wrapper');
 
-        document.body.append(wrapper);
-
         this.textArea.classList.add('inputarea');
         wrapper.append(this.textArea);
 
@@ -674,6 +672,7 @@ class V_keyboard {
         changeLang.innerText = 'Для переключения языка комбинация: левыe Alt + Shift';
         wrapper.append(changeLang);
 
+        document.body.append(wrapper);
 
         document.addEventListener('mousedown', this.mouseDownEvent.bind(this)); // Должен появляться класс active
         document.addEventListener('mouseup', this.mouseUpEvent.bind(this));
