@@ -747,14 +747,22 @@ class VirtualKeyboard {
 
   backSpaceHandler() {
     const startPos = this.textArea.selectionStart;
+    const endPos = this.textArea.selectionEnd;
 
-    if (startPos !== 0) {
+    if (startPos !== endPos) {
+      this.textArea.value = `${this.textArea.value.slice(0, startPos)}${this.textArea.value.slice(endPos)}`;
+
+      this.textArea.focus();
+      this.textArea.selectionStart = startPos;
+      this.textArea.selectionEnd = startPos;
+    } else if (startPos !== 0) {
       this.textArea.value = `${this.textArea.value.slice(0, startPos - 1)}${this.textArea.value.slice(startPos)}`;
+
+      this.textArea.focus();
+      this.textArea.selectionStart = startPos - 1;
+      this.textArea.selectionEnd = startPos - 1;
     }
 
-    this.textArea.focus();
-    this.textArea.selectionStart = startPos - 1;
-    this.textArea.selectionEnd = startPos - 1;
   }
 
   delHandler() {
