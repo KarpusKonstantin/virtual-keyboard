@@ -592,7 +592,7 @@ const buttonArrayRow5 = [
 
 //const allKeyArray = buttonArrayRow1.concat(buttonArrayRow2, buttonArrayRow3, buttonArrayRow4, buttonArrayRow5);
 
-class V_keyboard {
+class Virtual_keyboard {
     constructor () {
         this.capsLock = false;
         this.shift = false;
@@ -976,7 +976,7 @@ class V_keyboard {
 
 window.addEventListener('load', () => {
    console.log('Загружаем клавиатуру');
-   let v_keyboard = new V_keyboard();
+   let virtual_keyboard = new Virtual_keyboard();
 
-   v_keyboard.init();
+   virtual_keyboard.init();
 });
