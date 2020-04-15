@@ -884,7 +884,7 @@ class V_keyboard {
                 }
             }
 
-            if ((button.dataset.button === 'AlrRight') || (button.dataset.button === 'AlrLeft')) {
+            if ((button.dataset.button === 'AltRight') || (button.dataset.button === 'AltLeft')) {
                 this.alt = false;
             }
 
